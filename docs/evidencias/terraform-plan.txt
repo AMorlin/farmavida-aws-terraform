@@ -1,0 +1,2107 @@
+data.aws_availability_zones.disponiveis: Reading...
+data.aws_cloudfront_cache_policy.sem_cache: Reading...
+data.aws_cloudfront_origin_request_policy.tudo_menos_host: Reading...
+data.aws_caller_identity.atual: Reading...
+data.aws_ec2_managed_prefix_list.cloudfront: Reading...
+data.aws_cloudfront_cache_policy.otimizado: Reading...
+data.aws_ami.al2023_arm64: Reading...
+data.aws_caller_identity.atual: Read complete after 0s [id=<ACCOUNT_ID>]
+data.aws_availability_zones.disponiveis: Read complete after 0s [id=us-east-1]
+data.aws_cloudfront_origin_request_policy.tudo_menos_host: Read complete after 0s [id=b689b0a8-53d0-40ab-baf2-68738e2966ac]
+data.aws_cloudfront_cache_policy.otimizado: Read complete after 0s [id=658327ea-f89d-4fab-a63d-7e88639e58f6]
+data.aws_cloudfront_cache_policy.sem_cache: Read complete after 0s [id=4135ea2d-6df8-44a3-9df3-4b5a84be39ad]
+data.aws_ec2_managed_prefix_list.cloudfront: Read complete after 1s [id=pl-3b927c52]
+data.aws_ami.al2023_arm64: Read complete after 1s [id=ami-065b1b834d2a83a7a]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # aws_autoscaling_group.app will be created
+  + resource "aws_autoscaling_group" "app" {
+      + arn                              = (known after apply)
+      + availability_zones               = (known after apply)
+      + default_cooldown                 = (known after apply)
+      + default_instance_warmup          = 120
+      + desired_capacity                 = 2
+      + force_delete                     = false
+      + force_delete_warm_pool           = false
+      + health_check_grace_period        = 120
+      + health_check_type                = "ELB"
+      + id                               = (known after apply)
+      + ignore_failed_scaling_activities = false
+      + load_balancers                   = (known after apply)
+      + max_size                         = 20
+      + metrics_granularity              = "1Minute"
+      + min_size                         = 2
+      + name                             = "farmavida-asg"
+      + name_prefix                      = (known after apply)
+      + predicted_capacity               = (known after apply)
+      + protect_from_scale_in            = false
+      + service_linked_role_arn          = (known after apply)
+      + target_group_arns                = (known after apply)
+      + vpc_zone_identifier              = (known after apply)
+      + wait_for_capacity_timeout        = "10m"
+      + warm_pool_size                   = (known after apply)
+
+      + availability_zone_distribution (known after apply)
+
+      + capacity_reservation_specification (known after apply)
+
+      + instance_refresh {
+          + strategy = "Rolling"
+
+          + preferences {
+              + max_healthy_percentage       = 100
+              + min_healthy_percentage       = 50
+              + scale_in_protected_instances = "Ignore"
+              + skip_matching                = false
+              + standby_instances            = "Ignore"
+            }
+        }
+
+      + launch_template {
+          + id      = (known after apply)
+          + name    = (known after apply)
+          + version = "$Latest"
+        }
+
+      + mixed_instances_policy (known after apply)
+
+      + tag {
+          + key                 = "Ambiente"
+          + propagate_at_launch = true
+          + value               = "projeto-final"
+        }
+      + tag {
+          + key                 = "Grupo"
+          + propagate_at_launch = true
+          + value               = "addr"
+        }
+      + tag {
+          + key                 = "Owner"
+          + propagate_at_launch = true
+          + value               = "owner@farmavida.example"
+        }
+      + tag {
+          + key                 = "Projeto"
+          + propagate_at_launch = true
+          + value               = "ecommerce-farmavida"
+        }
+
+      + traffic_source (known after apply)
+    }
+
+  # aws_autoscaling_policy.cpu will be created
+  + resource "aws_autoscaling_policy" "cpu" {
+      + arn                     = (known after apply)
+      + autoscaling_group_name  = "farmavida-asg"
+      + enabled                 = true
+      + id                      = (known after apply)
+      + metric_aggregation_type = (known after apply)
+      + name                    = "farmavida-cpu-50"
+      + policy_type             = "TargetTrackingScaling"
+
+      + target_tracking_configuration {
+          + disable_scale_in = false
+          + target_value     = 50
+
+          + predefined_metric_specification {
+              + predefined_metric_type = "ASGAverageCPUUtilization"
+            }
+        }
+    }
+
+  # aws_autoscaling_policy.requisicoes will be created
+  + resource "aws_autoscaling_policy" "requisicoes" {
+      + arn                     = (known after apply)
+      + autoscaling_group_name  = "farmavida-asg"
+      + enabled                 = true
+      + id                      = (known after apply)
+      + metric_aggregation_type = (known after apply)
+      + name                    = "farmavida-req-por-alvo"
+      + policy_type             = "TargetTrackingScaling"
+
+      + target_tracking_configuration {
+          + disable_scale_in = false
+          + target_value     = 1000
+
+          + predefined_metric_specification {
+              + predefined_metric_type = "ALBRequestCountPerTarget"
+              + resource_label         = (known after apply)
+            }
+        }
+    }
+
+  # aws_budgets_budget.mensal will be created
+  + resource "aws_budgets_budget" "mensal" {
+      + account_id        = (known after apply)
+      + arn               = (known after apply)
+      + budget_type       = "COST"
+      + id                = (known after apply)
+      + limit_amount      = "300"
+      + limit_unit        = "USD"
+      + name              = "farmavida-mensal"
+      + name_prefix       = (known after apply)
+      + tags_all          = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + time_period_end   = "2087-06-15_00:00"
+      + time_period_start = (known after apply)
+      + time_unit         = "MONTHLY"
+
+      + cost_filter {
+          + name   = "TagKeyValue"
+          + values = [
+              + "user:Projeto$ecommerce-farmavida",
+            ]
+        }
+
+      + cost_types (known after apply)
+
+      + notification {
+          + comparison_operator        = "GREATER_THAN"
+          + notification_type          = "ACTUAL"
+          + subscriber_email_addresses = [
+              + "owner@farmavida.example",
+            ]
+          + subscriber_sns_topic_arns  = []
+          + threshold                  = 80
+          + threshold_type             = "PERCENTAGE"
+        }
+      + notification {
+          + comparison_operator        = "GREATER_THAN"
+          + notification_type          = "FORECASTED"
+          + subscriber_email_addresses = [
+              + "owner@farmavida.example",
+            ]
+          + subscriber_sns_topic_arns  = []
+          + threshold                  = 100
+          + threshold_type             = "PERCENTAGE"
+        }
+    }
+
+  # aws_cloudfront_distribution.cdn will be created
+  + resource "aws_cloudfront_distribution" "cdn" {
+      + arn                             = (known after apply)
+      + caller_reference                = (known after apply)
+      + comment                         = "FarmaVida - loja + imagens do catalogo"
+      + continuous_deployment_policy_id = (known after apply)
+      + domain_name                     = (known after apply)
+      + enabled                         = true
+      + etag                            = (known after apply)
+      + hosted_zone_id                  = (known after apply)
+      + http_version                    = "http2"
+      + id                              = (known after apply)
+      + in_progress_validation_batches  = (known after apply)
+      + is_ipv6_enabled                 = true
+      + last_modified_time              = (known after apply)
+      + price_class                     = "PriceClass_All"
+      + retain_on_delete                = false
+      + staging                         = false
+      + status                          = (known after apply)
+      + tags_all                        = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + trusted_key_groups              = (known after apply)
+      + trusted_signers                 = (known after apply)
+      + wait_for_deployment             = true
+
+      + default_cache_behavior {
+          + allowed_methods          = [
+              + "DELETE",
+              + "GET",
+              + "HEAD",
+              + "OPTIONS",
+              + "PATCH",
+              + "POST",
+              + "PUT",
+            ]
+          + cache_policy_id          = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+          + cached_methods           = [
+              + "GET",
+              + "HEAD",
+            ]
+          + compress                 = true
+          + default_ttl              = (known after apply)
+          + max_ttl                  = (known after apply)
+          + min_ttl                  = 0
+          + origin_request_policy_id = "b689b0a8-53d0-40ab-baf2-68738e2966ac"
+          + target_origin_id         = "alb-loja"
+          + trusted_key_groups       = (known after apply)
+          + trusted_signers          = (known after apply)
+          + viewer_protocol_policy   = "redirect-to-https"
+
+          + grpc_config (known after apply)
+        }
+
+      + ordered_cache_behavior {
+          + allowed_methods        = [
+              + "GET",
+              + "HEAD",
+            ]
+          + cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+          + cached_methods         = [
+              + "GET",
+              + "HEAD",
+            ]
+          + compress               = true
+          + default_ttl            = (known after apply)
+          + max_ttl                = (known after apply)
+          + min_ttl                = 0
+          + path_pattern           = "/img/*"
+          + target_origin_id       = "s3-imagens"
+          + viewer_protocol_policy = "redirect-to-https"
+
+          + grpc_config (known after apply)
+        }
+
+      + origin {
+          + connection_attempts      = 3
+          + connection_timeout       = 10
+          + domain_name              = (known after apply)
+          + origin_id                = "alb-loja"
+            # (2 unchanged attributes hidden)
+
+          + custom_origin_config {
+              + http_port                = 80
+              + https_port               = 443
+              + origin_keepalive_timeout = 5
+              + origin_protocol_policy   = "http-only"
+              + origin_read_timeout      = 30
+              + origin_ssl_protocols     = [
+                  + "TLSv1.2",
+                ]
+            }
+        }
+      + origin {
+          + connection_attempts      = 3
+          + connection_timeout       = 10
+          + domain_name              = (known after apply)
+          + origin_access_control_id = (known after apply)
+          + origin_id                = "s3-imagens"
+            # (1 unchanged attribute hidden)
+        }
+
+      + restrictions {
+          + geo_restriction {
+              + locations        = (known after apply)
+              + restriction_type = "none"
+            }
+        }
+
+      + viewer_certificate {
+          + cloudfront_default_certificate = true
+          + minimum_protocol_version       = "TLSv1.2_2021"
+        }
+    }
+
+  # aws_cloudfront_origin_access_control.imagens will be created
+  + resource "aws_cloudfront_origin_access_control" "imagens" {
+      + arn                               = (known after apply)
+      + description                       = "Managed by Terraform"
+      + etag                              = (known after apply)
+      + id                                = (known after apply)
+      + name                              = "farmavida-imagens-oac"
+      + origin_access_control_origin_type = "s3"
+      + signing_behavior                  = "always"
+      + signing_protocol                  = "sigv4"
+    }
+
+  # aws_cloudtrail.auditoria will be created
+  + resource "aws_cloudtrail" "auditoria" {
+      + arn                           = (known after apply)
+      + enable_log_file_validation    = true
+      + enable_logging                = true
+      + home_region                   = (known after apply)
+      + id                            = (known after apply)
+      + include_global_service_events = true
+      + is_multi_region_trail         = true
+      + is_organization_trail         = false
+      + kms_key_id                    = (known after apply)
+      + name                          = "farmavida-trilha"
+      + s3_bucket_name                = (known after apply)
+      + sns_topic_arn                 = (known after apply)
+      + tags_all                      = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+    }
+
+  # aws_cloudwatch_log_group.app will be created
+  + resource "aws_cloudwatch_log_group" "app" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + log_group_class   = (known after apply)
+      + name              = "/farmavida/app/nginx"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 30
+      + skip_destroy      = false
+      + tags_all          = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+    }
+
+  # aws_cloudwatch_metric_alarm.alb_5xx will be created
+  + resource "aws_cloudwatch_metric_alarm" "alb_5xx" {
+      + actions_enabled                       = true
+      + alarm_actions                         = (known after apply)
+      + alarm_description                     = "Erros 5xx das instancias acima de 10 em 5 min"
+      + alarm_name                            = "farmavida-alb-5xx"
+      + arn                                   = (known after apply)
+      + comparison_operator                   = "GreaterThanThreshold"
+      + dimensions                            = (known after apply)
+      + evaluate_low_sample_count_percentiles = (known after apply)
+      + evaluation_periods                    = 1
+      + id                                    = (known after apply)
+      + metric_name                           = "HTTPCode_Target_5XX_Count"
+      + namespace                             = "AWS/ApplicationELB"
+      + period                                = 300
+      + statistic                             = "Sum"
+      + tags_all                              = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + threshold                             = 10
+      + treat_missing_data                    = "notBreaching"
+    }
+
+  # aws_cloudwatch_metric_alarm.alvos_nao_saudaveis will be created
+  + resource "aws_cloudwatch_metric_alarm" "alvos_nao_saudaveis" {
+      + actions_enabled                       = true
+      + alarm_actions                         = (known after apply)
+      + alarm_description                     = "Alguma instancia reprovada no health check por 3 min"
+      + alarm_name                            = "farmavida-alvos-unhealthy"
+      + arn                                   = (known after apply)
+      + comparison_operator                   = "GreaterThanThreshold"
+      + dimensions                            = (known after apply)
+      + evaluate_low_sample_count_percentiles = (known after apply)
+      + evaluation_periods                    = 3
+      + id                                    = (known after apply)
+      + metric_name                           = "UnHealthyHostCount"
+      + namespace                             = "AWS/ApplicationELB"
+      + period                                = 60
+      + statistic                             = "Maximum"
+      + tags_all                              = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + threshold                             = 0
+      + treat_missing_data                    = "missing"
+    }
+
+  # aws_cloudwatch_metric_alarm.asg_cpu_alta will be created
+  + resource "aws_cloudwatch_metric_alarm" "asg_cpu_alta" {
+      + actions_enabled                       = true
+      + alarm_actions                         = (known after apply)
+      + alarm_description                     = "CPU media do ASG acima de 70% por 5 min (escala nao esta dando conta)"
+      + alarm_name                            = "farmavida-asg-cpu-alta"
+      + arn                                   = (known after apply)
+      + comparison_operator                   = "GreaterThanThreshold"
+      + dimensions                            = {
+          + "AutoScalingGroupName" = "farmavida-asg"
+        }
+      + evaluate_low_sample_count_percentiles = (known after apply)
+      + evaluation_periods                    = 5
+      + id                                    = (known after apply)
+      + metric_name                           = "CPUUtilization"
+      + namespace                             = "AWS/EC2"
+      + ok_actions                            = (known after apply)
+      + period                                = 60
+      + statistic                             = "Average"
+      + tags_all                              = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + threshold                             = 70
+      + treat_missing_data                    = "missing"
+    }
+
+  # aws_cloudwatch_metric_alarm.rds_cpu will be created
+  + resource "aws_cloudwatch_metric_alarm" "rds_cpu" {
+      + actions_enabled                       = true
+      + alarm_actions                         = (known after apply)
+      + alarm_description                     = "CPU do RDS acima de 80% por 10 min (avaliar classe maior ou read replica)"
+      + alarm_name                            = "farmavida-rds-cpu"
+      + arn                                   = (known after apply)
+      + comparison_operator                   = "GreaterThanThreshold"
+      + dimensions                            = {
+          + "DBInstanceIdentifier" = "farmavida-db"
+        }
+      + evaluate_low_sample_count_percentiles = (known after apply)
+      + evaluation_periods                    = 2
+      + id                                    = (known after apply)
+      + metric_name                           = "CPUUtilization"
+      + namespace                             = "AWS/RDS"
+      + period                                = 300
+      + statistic                             = "Average"
+      + tags_all                              = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + threshold                             = 80
+      + treat_missing_data                    = "missing"
+    }
+
+  # aws_cloudwatch_metric_alarm.rds_disco will be created
+  + resource "aws_cloudwatch_metric_alarm" "rds_disco" {
+      + actions_enabled                       = true
+      + alarm_actions                         = (known after apply)
+      + alarm_description                     = "Menos de 2 GB livres no RDS"
+      + alarm_name                            = "farmavida-rds-disco"
+      + arn                                   = (known after apply)
+      + comparison_operator                   = "LessThanThreshold"
+      + dimensions                            = {
+          + "DBInstanceIdentifier" = "farmavida-db"
+        }
+      + evaluate_low_sample_count_percentiles = (known after apply)
+      + evaluation_periods                    = 1
+      + id                                    = (known after apply)
+      + metric_name                           = "FreeStorageSpace"
+      + namespace                             = "AWS/RDS"
+      + period                                = 300
+      + statistic                             = "Minimum"
+      + tags_all                              = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + threshold                             = 2147483648
+      + treat_missing_data                    = "missing"
+    }
+
+  # aws_db_instance.principal will be created
+  + resource "aws_db_instance" "principal" {
+      + address                               = (known after apply)
+      + allocated_storage                     = 20
+      + apply_immediately                     = false
+      + arn                                   = (known after apply)
+      + auto_minor_version_upgrade            = true
+      + availability_zone                     = (known after apply)
+      + backup_retention_period               = 7
+      + backup_target                         = (known after apply)
+      + backup_window                         = "06:00-07:00"
+      + ca_cert_identifier                    = (known after apply)
+      + character_set_name                    = (known after apply)
+      + copy_tags_to_snapshot                 = true
+      + database_insights_mode                = (known after apply)
+      + db_name                               = "farmavida"
+      + db_subnet_group_name                  = "farmavida-dados"
+      + dedicated_log_volume                  = false
+      + delete_automated_backups              = true
+      + deletion_protection                   = true
+      + domain_fqdn                           = (known after apply)
+      + enabled_cloudwatch_logs_exports       = [
+          + "postgresql",
+        ]
+      + endpoint                              = (known after apply)
+      + engine                                = "postgres"
+      + engine_lifecycle_support              = (known after apply)
+      + engine_version                        = "17"
+      + engine_version_actual                 = (known after apply)
+      + final_snapshot_identifier             = "farmavida-db-final"
+      + hosted_zone_id                        = (known after apply)
+      + id                                    = (known after apply)
+      + identifier                            = "farmavida-db"
+      + identifier_prefix                     = (known after apply)
+      + instance_class                        = "db.t4g.small"
+      + iops                                  = (known after apply)
+      + kms_key_id                            = (known after apply)
+      + latest_restorable_time                = (known after apply)
+      + license_model                         = (known after apply)
+      + listener_endpoint                     = (known after apply)
+      + maintenance_window                    = "sun:07:00-sun:08:00"
+      + manage_master_user_password           = true
+      + master_user_secret                    = (known after apply)
+      + master_user_secret_kms_key_id         = (known after apply)
+      + max_allocated_storage                 = 100
+      + monitoring_interval                   = 0
+      + monitoring_role_arn                   = (known after apply)
+      + multi_az                              = true
+      + nchar_character_set_name              = (known after apply)
+      + network_type                          = (known after apply)
+      + option_group_name                     = (known after apply)
+      + parameter_group_name                  = "farmavida-pg17"
+      + password_wo                           = (write-only attribute)
+      + performance_insights_enabled          = false
+      + performance_insights_kms_key_id       = (known after apply)
+      + performance_insights_retention_period = (known after apply)
+      + port                                  = (known after apply)
+      + publicly_accessible                   = false
+      + replica_mode                          = (known after apply)
+      + replicas                              = (known after apply)
+      + resource_id                           = (known after apply)
+      + skip_final_snapshot                   = false
+      + snapshot_identifier                   = (known after apply)
+      + status                                = (known after apply)
+      + storage_encrypted                     = true
+      + storage_throughput                    = (known after apply)
+      + storage_type                          = "gp3"
+      + tags_all                              = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + timezone                              = (known after apply)
+      + username                              = "farmavida_admin"
+      + vpc_security_group_ids                = (known after apply)
+    }
+
+  # aws_db_parameter_group.pg will be created
+  + resource "aws_db_parameter_group" "pg" {
+      + arn          = (known after apply)
+      + description  = "Managed by Terraform"
+      + family       = "postgres17"
+      + id           = (known after apply)
+      + name         = "farmavida-pg17"
+      + name_prefix  = (known after apply)
+      + skip_destroy = false
+      + tags_all     = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+
+      + parameter {
+          + apply_method = "immediate"
+          + name         = "log_min_duration_statement"
+          + value        = "1000"
+        }
+      + parameter {
+          + apply_method = "immediate"
+          + name         = "rds.force_ssl"
+          + value        = "1"
+        }
+    }
+
+  # aws_db_subnet_group.dados will be created
+  + resource "aws_db_subnet_group" "dados" {
+      + arn                     = (known after apply)
+      + description             = "Managed by Terraform"
+      + id                      = (known after apply)
+      + name                    = "farmavida-dados"
+      + name_prefix             = (known after apply)
+      + subnet_ids              = (known after apply)
+      + supported_network_types = (known after apply)
+      + tags_all                = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id                  = (known after apply)
+    }
+
+  # aws_eip.nat[0] will be created
+  + resource "aws_eip" "nat" {
+      + allocation_id        = (known after apply)
+      + arn                  = (known after apply)
+      + association_id       = (known after apply)
+      + carrier_ip           = (known after apply)
+      + customer_owned_ip    = (known after apply)
+      + domain               = "vpc"
+      + id                   = (known after apply)
+      + instance             = (known after apply)
+      + ipam_pool_id         = (known after apply)
+      + network_border_group = (known after apply)
+      + network_interface    = (known after apply)
+      + private_dns          = (known after apply)
+      + private_ip           = (known after apply)
+      + ptr_record           = (known after apply)
+      + public_dns           = (known after apply)
+      + public_ip            = (known after apply)
+      + public_ipv4_pool     = (known after apply)
+      + tags                 = {
+          + "Name" = "farmavida-nat-eip-a"
+        }
+      + tags_all             = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-nat-eip-a"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc                  = (known after apply)
+    }
+
+  # aws_eip.nat[1] will be created
+  + resource "aws_eip" "nat" {
+      + allocation_id        = (known after apply)
+      + arn                  = (known after apply)
+      + association_id       = (known after apply)
+      + carrier_ip           = (known after apply)
+      + customer_owned_ip    = (known after apply)
+      + domain               = "vpc"
+      + id                   = (known after apply)
+      + instance             = (known after apply)
+      + ipam_pool_id         = (known after apply)
+      + network_border_group = (known after apply)
+      + network_interface    = (known after apply)
+      + private_dns          = (known after apply)
+      + private_ip           = (known after apply)
+      + ptr_record           = (known after apply)
+      + public_dns           = (known after apply)
+      + public_ip            = (known after apply)
+      + public_ipv4_pool     = (known after apply)
+      + tags                 = {
+          + "Name" = "farmavida-nat-eip-b"
+        }
+      + tags_all             = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-nat-eip-b"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc                  = (known after apply)
+    }
+
+  # aws_iam_instance_profile.app will be created
+  + resource "aws_iam_instance_profile" "app" {
+      + arn         = (known after apply)
+      + create_date = (known after apply)
+      + id          = (known after apply)
+      + name        = "farmavida-ec2-app"
+      + name_prefix = (known after apply)
+      + path        = "/"
+      + role        = "farmavida-ec2-app"
+      + tags_all    = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + unique_id   = (known after apply)
+    }
+
+  # aws_iam_role.app will be created
+  + resource "aws_iam_role" "app" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "ec2.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "farmavida-ec2-app"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role_policy.app will be created
+  + resource "aws_iam_role_policy" "app" {
+      + id          = (known after apply)
+      + name        = "farmavida-app-minimo"
+      + name_prefix = (known after apply)
+      + policy      = (known after apply)
+      + role        = (known after apply)
+    }
+
+  # aws_iam_role_policy_attachment.cloudwatch_agent will be created
+  + resource "aws_iam_role_policy_attachment" "cloudwatch_agent" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+      + role       = "farmavida-ec2-app"
+    }
+
+  # aws_iam_role_policy_attachment.ssm will be created
+  + resource "aws_iam_role_policy_attachment" "ssm" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+      + role       = "farmavida-ec2-app"
+    }
+
+  # aws_internet_gateway.igw will be created
+  + resource "aws_internet_gateway" "igw" {
+      + arn      = (known after apply)
+      + id       = (known after apply)
+      + owner_id = (known after apply)
+      + tags     = {
+          + "Name" = "farmavida-igw"
+        }
+      + tags_all = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-igw"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id   = (known after apply)
+    }
+
+  # aws_kms_alias.dados will be created
+  + resource "aws_kms_alias" "dados" {
+      + arn            = (known after apply)
+      + id             = (known after apply)
+      + name           = "alias/farmavida-dados"
+      + name_prefix    = (known after apply)
+      + target_key_arn = (known after apply)
+      + target_key_id  = (known after apply)
+    }
+
+  # aws_kms_key.dados will be created
+  + resource "aws_kms_key" "dados" {
+      + arn                                = (known after apply)
+      + bypass_policy_lockout_safety_check = false
+      + customer_master_key_spec           = "SYMMETRIC_DEFAULT"
+      + deletion_window_in_days            = 30
+      + description                        = "FarmaVida - dados pessoais e de pagamento (RDS, S3, CloudTrail)"
+      + enable_key_rotation                = true
+      + id                                 = (known after apply)
+      + is_enabled                         = true
+      + key_id                             = (known after apply)
+      + key_usage                          = "ENCRYPT_DECRYPT"
+      + multi_region                       = (known after apply)
+      + policy                             = (known after apply)
+      + rotation_period_in_days            = (known after apply)
+      + tags_all                           = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+    }
+
+  # aws_launch_template.app will be created
+  + resource "aws_launch_template" "app" {
+      + arn                    = (known after apply)
+      + default_version        = (known after apply)
+      + id                     = (known after apply)
+      + image_id               = "ami-065b1b834d2a83a7a"
+      + instance_type          = "t4g.small"
+      + latest_version         = (known after apply)
+      + name                   = (known after apply)
+      + name_prefix            = "farmavida-app-"
+      + tags_all               = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + user_data              = "IyEvYmluL2Jhc2gKIyBCb290IGRhcyBpbnN0w6JuY2lhcyB3ZWIgZGEgRmFybWFWaWRhIChBbWF6b24gTGludXggMjAyMywgYXJtNjQpLgojIFNvYmUgdW0gbmdpbnggcXVlIHJlc3BvbmRlIHF1YWwgaW5zdMOibmNpYSBlIHF1YWwgQVogYXRlbmRlcmFtIGEgcmVxdWlzacOnw6NvLAojIG8gcXVlIGRlaXhhIHZpc8OtdmVsIG8gYmFsYW5jZWFtZW50byBkbyBBTEIgZW50cmUgYXMgZHVhcyB6b25hcy4Kc2V0IC1ldW8gcGlwZWZhaWwKCmRuZiBpbnN0YWxsIC15IG5naW54CgojIElNRFN2MiAobyBsYXVuY2ggdGVtcGxhdGUgZXhpZ2UgdG9rZW4pClRPS0VOPSQoY3VybCAtcyAtWCBQVVQgaHR0cDovLzE2OS4yNTQuMTY5LjI1NC9sYXRlc3QvYXBpL3Rva2VuIC1IICJYLWF3cy1lYzItbWV0YWRhdGEtdG9rZW4tdHRsLXNlY29uZHM6IDEyMCIpCm1ldGEoKSB7IGN1cmwgLXMgLUggIlgtYXdzLWVjMi1tZXRhZGF0YS10b2tlbjogJFRPS0VOIiAiaHR0cDovLzE2OS4yNTQuMTY5LjI1NC9sYXRlc3QvbWV0YS1kYXRhLyQxIjsgfQpJTlNUQU5DSUE9JChtZXRhIGluc3RhbmNlLWlkKQpaT05BPSQobWV0YSBwbGFjZW1lbnQvYXZhaWxhYmlsaXR5LXpvbmUpClRJUE89JChtZXRhIGluc3RhbmNlLXR5cGUpCgpjYXQgPiAvdXNyL3NoYXJlL25naW54L2h0bWwvaW5kZXguaHRtbCA8PEhUTUwKPCFkb2N0eXBlIGh0bWw+CjxodG1sIGxhbmc9InB0LUJSIj4KPGhlYWQ+PG1ldGEgY2hhcnNldD0idXRmLTgiPjx0aXRsZT5GYXJtYVZpZGE8L3RpdGxlPjwvaGVhZD4KPGJvZHkgc3R5bGU9ImZvbnQtZmFtaWx5OiBzeXN0ZW0tdWksIHNhbnMtc2VyaWY7IG1heC13aWR0aDogNjQwcHg7IG1hcmdpbjogNjRweCBhdXRvOyBjb2xvcjogIzFmMmE0NCI+CiAgPGgxPkZhcm1hVmlkYSDigJQgbG9qYSBvbmxpbmU8L2gxPgogIDxwPlDDoWdpbmEgc2VydmlkYSBwb3IgPHN0cm9uZz4ke0lOU1RBTkNJQX08L3N0cm9uZz4gKCR7VElQT30pIG5hIHpvbmEgPHN0cm9uZz4ke1pPTkF9PC9zdHJvbmc+LjwvcD4KICA8cD5SZWNhcnJlZ3VlIGFsZ3VtYXMgdmV6ZXM6IG8gQXBwbGljYXRpb24gTG9hZCBCYWxhbmNlciBhbHRlcm5hIGVudHJlIGFzIGluc3TDom5jaWFzIGRhcyBkdWFzIEFacy48L3A+CjwvYm9keT4KPC9odG1sPgpIVE1MCgojIEhlYWx0aCBjaGVjayBkbyB0YXJnZXQgZ3JvdXAKcHJpbnRmICdva1xuJyA+IC91c3Ivc2hhcmUvbmdpbngvaHRtbC9oZWFsdGgKCnN5c3RlbWN0bCBlbmFibGUgLS1ub3cgbmdpbngK"
+      + vpc_security_group_ids = (known after apply)
+
+      + block_device_mappings {
+          + device_name = "/dev/xvda"
+
+          + ebs {
+              + delete_on_termination      = "true"
+              + encrypted                  = "true"
+              + iops                       = (known after apply)
+              + throughput                 = (known after apply)
+              + volume_initialization_rate = (known after apply)
+              + volume_size                = 8
+              + volume_type                = "gp3"
+            }
+        }
+
+      + iam_instance_profile {
+          + arn = (known after apply)
+        }
+
+      + metadata_options {
+          + http_endpoint               = (known after apply)
+          + http_protocol_ipv6          = (known after apply)
+          + http_put_response_hop_limit = 1
+          + http_tokens                 = "required"
+          + instance_metadata_tags      = (known after apply)
+        }
+
+      + monitoring {
+          + enabled = true
+        }
+
+      + tag_specifications {
+          + resource_type = "instance"
+          + tags          = {
+              + "Name" = "farmavida-app"
+            }
+        }
+      + tag_specifications {
+          + resource_type = "volume"
+          + tags          = {
+              + "Name" = "farmavida-app"
+            }
+        }
+    }
+
+  # aws_lb.web will be created
+  + resource "aws_lb" "web" {
+      + arn                                                          = (known after apply)
+      + arn_suffix                                                   = (known after apply)
+      + client_keep_alive                                            = 3600
+      + desync_mitigation_mode                                       = "defensive"
+      + dns_name                                                     = (known after apply)
+      + drop_invalid_header_fields                                   = true
+      + enable_deletion_protection                                   = false
+      + enable_http2                                                 = true
+      + enable_tls_version_and_cipher_suite_headers                  = false
+      + enable_waf_fail_open                                         = false
+      + enable_xff_client_port                                       = false
+      + enable_zonal_shift                                           = false
+      + enforce_security_group_inbound_rules_on_private_link_traffic = (known after apply)
+      + id                                                           = (known after apply)
+      + idle_timeout                                                 = 60
+      + internal                                                     = false
+      + ip_address_type                                              = (known after apply)
+      + load_balancer_type                                           = "application"
+      + name                                                         = "farmavida-alb"
+      + name_prefix                                                  = (known after apply)
+      + preserve_host_header                                         = false
+      + security_groups                                              = (known after apply)
+      + subnets                                                      = (known after apply)
+      + tags_all                                                     = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id                                                       = (known after apply)
+      + xff_header_processing_mode                                   = "append"
+      + zone_id                                                      = (known after apply)
+
+      + subnet_mapping (known after apply)
+    }
+
+  # aws_lb_listener.http will be created
+  + resource "aws_lb_listener" "http" {
+      + arn                                                                   = (known after apply)
+      + id                                                                    = (known after apply)
+      + load_balancer_arn                                                     = (known after apply)
+      + port                                                                  = 80
+      + protocol                                                              = "HTTP"
+      + routing_http_request_x_amzn_mtls_clientcert_header_name               = (known after apply)
+      + routing_http_request_x_amzn_mtls_clientcert_issuer_header_name        = (known after apply)
+      + routing_http_request_x_amzn_mtls_clientcert_leaf_header_name          = (known after apply)
+      + routing_http_request_x_amzn_mtls_clientcert_serial_number_header_name = (known after apply)
+      + routing_http_request_x_amzn_mtls_clientcert_subject_header_name       = (known after apply)
+      + routing_http_request_x_amzn_mtls_clientcert_validity_header_name      = (known after apply)
+      + routing_http_request_x_amzn_tls_cipher_suite_header_name              = (known after apply)
+      + routing_http_request_x_amzn_tls_version_header_name                   = (known after apply)
+      + routing_http_response_access_control_allow_credentials_header_value   = (known after apply)
+      + routing_http_response_access_control_allow_headers_header_value       = (known after apply)
+      + routing_http_response_access_control_allow_methods_header_value       = (known after apply)
+      + routing_http_response_access_control_allow_origin_header_value        = (known after apply)
+      + routing_http_response_access_control_expose_headers_header_value      = (known after apply)
+      + routing_http_response_access_control_max_age_header_value             = (known after apply)
+      + routing_http_response_content_security_policy_header_value            = (known after apply)
+      + routing_http_response_server_enabled                                  = (known after apply)
+      + routing_http_response_strict_transport_security_header_value          = (known after apply)
+      + routing_http_response_x_content_type_options_header_value             = (known after apply)
+      + routing_http_response_x_frame_options_header_value                    = (known after apply)
+      + ssl_policy                                                            = (known after apply)
+      + tags_all                                                              = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + tcp_idle_timeout_seconds                                              = (known after apply)
+
+      + default_action {
+          + order            = (known after apply)
+          + target_group_arn = (known after apply)
+          + type             = "forward"
+        }
+
+      + mutual_authentication (known after apply)
+    }
+
+  # aws_lb_listener_rule.bloqueia_admin will be created
+  + resource "aws_lb_listener_rule" "bloqueia_admin" {
+      + arn          = (known after apply)
+      + id           = (known after apply)
+      + listener_arn = (known after apply)
+      + priority     = 10
+      + tags_all     = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+
+      + action {
+          + order = (known after apply)
+          + type  = "fixed-response"
+
+          + fixed_response {
+              + content_type = "text/plain"
+              + message_body = "Acesso restrito a rede interna"
+              + status_code  = "403"
+            }
+        }
+
+      + condition {
+          + path_pattern {
+              + values = [
+                  + "/admin",
+                  + "/admin/*",
+                ]
+            }
+        }
+    }
+
+  # aws_lb_target_group.app will be created
+  + resource "aws_lb_target_group" "app" {
+      + arn                                = (known after apply)
+      + arn_suffix                         = (known after apply)
+      + connection_termination             = (known after apply)
+      + deregistration_delay               = "30"
+      + id                                 = (known after apply)
+      + ip_address_type                    = (known after apply)
+      + lambda_multi_value_headers_enabled = false
+      + load_balancer_arns                 = (known after apply)
+      + load_balancing_algorithm_type      = (known after apply)
+      + load_balancing_anomaly_mitigation  = (known after apply)
+      + load_balancing_cross_zone_enabled  = (known after apply)
+      + name                               = "farmavida-tg"
+      + name_prefix                        = (known after apply)
+      + port                               = 80
+      + preserve_client_ip                 = (known after apply)
+      + protocol                           = "HTTP"
+      + protocol_version                   = (known after apply)
+      + proxy_protocol_v2                  = false
+      + slow_start                         = 0
+      + tags_all                           = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + target_type                        = "instance"
+      + vpc_id                             = (known after apply)
+
+      + health_check {
+          + enabled             = true
+          + healthy_threshold   = 2
+          + interval            = 15
+          + matcher             = "200"
+          + path                = "/health"
+          + port                = "traffic-port"
+          + protocol            = "HTTP"
+          + timeout             = (known after apply)
+          + unhealthy_threshold = 3
+        }
+
+      + stickiness (known after apply)
+
+      + target_failover (known after apply)
+
+      + target_group_health (known after apply)
+
+      + target_health_state (known after apply)
+    }
+
+  # aws_nat_gateway.nat[0] will be created
+  + resource "aws_nat_gateway" "nat" {
+      + allocation_id                      = (known after apply)
+      + association_id                     = (known after apply)
+      + connectivity_type                  = "public"
+      + id                                 = (known after apply)
+      + network_interface_id               = (known after apply)
+      + private_ip                         = (known after apply)
+      + public_ip                          = (known after apply)
+      + secondary_private_ip_address_count = (known after apply)
+      + secondary_private_ip_addresses     = (known after apply)
+      + subnet_id                          = (known after apply)
+      + tags                               = {
+          + "Name" = "farmavida-nat-a"
+        }
+      + tags_all                           = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-nat-a"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+    }
+
+  # aws_nat_gateway.nat[1] will be created
+  + resource "aws_nat_gateway" "nat" {
+      + allocation_id                      = (known after apply)
+      + association_id                     = (known after apply)
+      + connectivity_type                  = "public"
+      + id                                 = (known after apply)
+      + network_interface_id               = (known after apply)
+      + private_ip                         = (known after apply)
+      + public_ip                          = (known after apply)
+      + secondary_private_ip_address_count = (known after apply)
+      + secondary_private_ip_addresses     = (known after apply)
+      + subnet_id                          = (known after apply)
+      + tags                               = {
+          + "Name" = "farmavida-nat-b"
+        }
+      + tags_all                           = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-nat-b"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+    }
+
+  # aws_network_acl.dados will be created
+  + resource "aws_network_acl" "dados" {
+      + arn        = (known after apply)
+      + egress     = [
+          + {
+              + action          = "allow"
+              + cidr_block      = "10.0.11.0/24"
+              + from_port       = 1024
+              + protocol        = "tcp"
+              + rule_no         = 100
+              + to_port         = 65535
+                # (1 unchanged attribute hidden)
+            },
+          + {
+              + action          = "allow"
+              + cidr_block      = "10.0.12.0/24"
+              + from_port       = 1024
+              + protocol        = "tcp"
+              + rule_no         = 101
+              + to_port         = 65535
+                # (1 unchanged attribute hidden)
+            },
+          + {
+              + action          = "allow"
+              + cidr_block      = "10.0.20.0/23"
+              + from_port       = 0
+              + protocol        = "-1"
+              + rule_no         = 200
+              + to_port         = 0
+                # (1 unchanged attribute hidden)
+            },
+        ]
+      + id         = (known after apply)
+      + ingress    = [
+          + {
+              + action          = "allow"
+              + cidr_block      = "10.0.11.0/24"
+              + from_port       = 5432
+              + protocol        = "tcp"
+              + rule_no         = 100
+              + to_port         = 5432
+                # (1 unchanged attribute hidden)
+            },
+          + {
+              + action          = "allow"
+              + cidr_block      = "10.0.12.0/24"
+              + from_port       = 5432
+              + protocol        = "tcp"
+              + rule_no         = 101
+              + to_port         = 5432
+                # (1 unchanged attribute hidden)
+            },
+          + {
+              + action          = "allow"
+              + cidr_block      = "10.0.20.0/23"
+              + from_port       = 0
+              + protocol        = "-1"
+              + rule_no         = 200
+              + to_port         = 0
+                # (1 unchanged attribute hidden)
+            },
+        ]
+      + owner_id   = (known after apply)
+      + subnet_ids = (known after apply)
+      + tags       = {
+          + "Name" = "farmavida-nacl-dados"
+        }
+      + tags_all   = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-nacl-dados"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id     = (known after apply)
+    }
+
+  # aws_route_table.app[0] will be created
+  + resource "aws_route_table" "app" {
+      + arn              = (known after apply)
+      + id               = (known after apply)
+      + owner_id         = (known after apply)
+      + propagating_vgws = (known after apply)
+      + route            = [
+          + {
+              + cidr_block                 = "0.0.0.0/0"
+              + nat_gateway_id             = (known after apply)
+                # (11 unchanged attributes hidden)
+            },
+        ]
+      + tags             = {
+          + "Name" = "farmavida-rt-app-a"
+        }
+      + tags_all         = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-rt-app-a"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id           = (known after apply)
+    }
+
+  # aws_route_table.app[1] will be created
+  + resource "aws_route_table" "app" {
+      + arn              = (known after apply)
+      + id               = (known after apply)
+      + owner_id         = (known after apply)
+      + propagating_vgws = (known after apply)
+      + route            = [
+          + {
+              + cidr_block                 = "0.0.0.0/0"
+              + nat_gateway_id             = (known after apply)
+                # (11 unchanged attributes hidden)
+            },
+        ]
+      + tags             = {
+          + "Name" = "farmavida-rt-app-b"
+        }
+      + tags_all         = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-rt-app-b"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id           = (known after apply)
+    }
+
+  # aws_route_table.dados will be created
+  + resource "aws_route_table" "dados" {
+      + arn              = (known after apply)
+      + id               = (known after apply)
+      + owner_id         = (known after apply)
+      + propagating_vgws = (known after apply)
+      + route            = (known after apply)
+      + tags             = {
+          + "Name" = "farmavida-rt-dados"
+        }
+      + tags_all         = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-rt-dados"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id           = (known after apply)
+    }
+
+  # aws_route_table.publica will be created
+  + resource "aws_route_table" "publica" {
+      + arn              = (known after apply)
+      + id               = (known after apply)
+      + owner_id         = (known after apply)
+      + propagating_vgws = (known after apply)
+      + route            = [
+          + {
+              + cidr_block                 = "0.0.0.0/0"
+              + gateway_id                 = (known after apply)
+                # (11 unchanged attributes hidden)
+            },
+        ]
+      + tags             = {
+          + "Name" = "farmavida-rt-publica"
+        }
+      + tags_all         = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-rt-publica"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id           = (known after apply)
+    }
+
+  # aws_route_table_association.app[0] will be created
+  + resource "aws_route_table_association" "app" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_route_table_association.app[1] will be created
+  + resource "aws_route_table_association" "app" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_route_table_association.dados[0] will be created
+  + resource "aws_route_table_association" "dados" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_route_table_association.dados[1] will be created
+  + resource "aws_route_table_association" "dados" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_route_table_association.publica[0] will be created
+  + resource "aws_route_table_association" "publica" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_route_table_association.publica[1] will be created
+  + resource "aws_route_table_association" "publica" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_s3_bucket.imagens will be created
+  + resource "aws_s3_bucket" "imagens" {
+      + acceleration_status         = (known after apply)
+      + acl                         = (known after apply)
+      + arn                         = (known after apply)
+      + bucket                      = (known after apply)
+      + bucket_domain_name          = (known after apply)
+      + bucket_prefix               = (known after apply)
+      + bucket_regional_domain_name = (known after apply)
+      + force_destroy               = false
+      + hosted_zone_id              = (known after apply)
+      + id                          = (known after apply)
+      + object_lock_enabled         = (known after apply)
+      + policy                      = (known after apply)
+      + region                      = (known after apply)
+      + request_payer               = (known after apply)
+      + tags_all                    = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + website_domain              = (known after apply)
+      + website_endpoint            = (known after apply)
+
+      + cors_rule (known after apply)
+
+      + grant (known after apply)
+
+      + lifecycle_rule (known after apply)
+
+      + logging (known after apply)
+
+      + object_lock_configuration (known after apply)
+
+      + replication_configuration (known after apply)
+
+      + server_side_encryption_configuration (known after apply)
+
+      + versioning (known after apply)
+
+      + website (known after apply)
+    }
+
+  # aws_s3_bucket.trilha will be created
+  + resource "aws_s3_bucket" "trilha" {
+      + acceleration_status         = (known after apply)
+      + acl                         = (known after apply)
+      + arn                         = (known after apply)
+      + bucket                      = (known after apply)
+      + bucket_domain_name          = (known after apply)
+      + bucket_prefix               = (known after apply)
+      + bucket_regional_domain_name = (known after apply)
+      + force_destroy               = true
+      + hosted_zone_id              = (known after apply)
+      + id                          = (known after apply)
+      + object_lock_enabled         = (known after apply)
+      + policy                      = (known after apply)
+      + region                      = (known after apply)
+      + request_payer               = (known after apply)
+      + tags_all                    = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + website_domain              = (known after apply)
+      + website_endpoint            = (known after apply)
+
+      + cors_rule (known after apply)
+
+      + grant (known after apply)
+
+      + lifecycle_rule (known after apply)
+
+      + logging (known after apply)
+
+      + object_lock_configuration (known after apply)
+
+      + replication_configuration (known after apply)
+
+      + server_side_encryption_configuration (known after apply)
+
+      + versioning (known after apply)
+
+      + website (known after apply)
+    }
+
+  # aws_s3_bucket_lifecycle_configuration.imagens will be created
+  + resource "aws_s3_bucket_lifecycle_configuration" "imagens" {
+      + bucket                                 = (known after apply)
+      + expected_bucket_owner                  = (known after apply)
+      + id                                     = (known after apply)
+      + transition_default_minimum_object_size = "all_storage_classes_128K"
+
+      + rule {
+          + id     = "catalogo-intelligent-tiering"
+          + status = "Enabled"
+            # (1 unchanged attribute hidden)
+
+          + filter {
+              + prefix = "catalogo/"
+            }
+
+          + transition {
+              + days          = 30
+              + storage_class = "INTELLIGENT_TIERING"
+            }
+        }
+      + rule {
+          + id     = "versoes-antigas"
+          + status = "Enabled"
+            # (1 unchanged attribute hidden)
+
+          + abort_incomplete_multipart_upload {
+              + days_after_initiation = 7
+            }
+
+          + filter {
+                # (1 unchanged attribute hidden)
+            }
+
+          + noncurrent_version_expiration {
+              + noncurrent_days = 30
+            }
+        }
+    }
+
+  # aws_s3_bucket_lifecycle_configuration.trilha will be created
+  + resource "aws_s3_bucket_lifecycle_configuration" "trilha" {
+      + bucket                                 = (known after apply)
+      + expected_bucket_owner                  = (known after apply)
+      + id                                     = (known after apply)
+      + transition_default_minimum_object_size = "all_storage_classes_128K"
+
+      + rule {
+          + id     = "logs-auditoria"
+          + status = "Enabled"
+            # (1 unchanged attribute hidden)
+
+          + expiration {
+              + days                         = 1825
+              + expired_object_delete_marker = false
+            }
+
+          + filter {
+                # (1 unchanged attribute hidden)
+            }
+
+          + transition {
+              + days          = 90
+              + storage_class = "GLACIER_IR"
+            }
+        }
+    }
+
+  # aws_s3_bucket_ownership_controls.imagens will be created
+  + resource "aws_s3_bucket_ownership_controls" "imagens" {
+      + bucket = (known after apply)
+      + id     = (known after apply)
+
+      + rule {
+          + object_ownership = "BucketOwnerEnforced"
+        }
+    }
+
+  # aws_s3_bucket_policy.imagens will be created
+  + resource "aws_s3_bucket_policy" "imagens" {
+      + bucket = (known after apply)
+      + id     = (known after apply)
+      + policy = (known after apply)
+    }
+
+  # aws_s3_bucket_policy.trilha will be created
+  + resource "aws_s3_bucket_policy" "trilha" {
+      + bucket = (known after apply)
+      + id     = (known after apply)
+      + policy = (known after apply)
+    }
+
+  # aws_s3_bucket_public_access_block.imagens will be created
+  + resource "aws_s3_bucket_public_access_block" "imagens" {
+      + block_public_acls       = true
+      + block_public_policy     = true
+      + bucket                  = (known after apply)
+      + id                      = (known after apply)
+      + ignore_public_acls      = true
+      + restrict_public_buckets = true
+    }
+
+  # aws_s3_bucket_public_access_block.trilha will be created
+  + resource "aws_s3_bucket_public_access_block" "trilha" {
+      + block_public_acls       = true
+      + block_public_policy     = true
+      + bucket                  = (known after apply)
+      + id                      = (known after apply)
+      + ignore_public_acls      = true
+      + restrict_public_buckets = true
+    }
+
+  # aws_s3_bucket_server_side_encryption_configuration.imagens will be created
+  + resource "aws_s3_bucket_server_side_encryption_configuration" "imagens" {
+      + bucket = (known after apply)
+      + id     = (known after apply)
+
+      + rule {
+          + bucket_key_enabled = true
+
+          + apply_server_side_encryption_by_default {
+              + kms_master_key_id = (known after apply)
+              + sse_algorithm     = "aws:kms"
+            }
+        }
+    }
+
+  # aws_s3_bucket_versioning.imagens will be created
+  + resource "aws_s3_bucket_versioning" "imagens" {
+      + bucket = (known after apply)
+      + id     = (known after apply)
+
+      + versioning_configuration {
+          + mfa_delete = (known after apply)
+          + status     = "Enabled"
+        }
+    }
+
+  # aws_security_group.alb will be created
+  + resource "aws_security_group" "alb" {
+      + arn                    = (known after apply)
+      + description            = "ALB - aceita apenas trafego vindo do CloudFront"
+      + egress                 = (known after apply)
+      + id                     = (known after apply)
+      + ingress                = (known after apply)
+      + name                   = "farmavida-alb"
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Name" = "sg-alb"
+        }
+      + tags_all               = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "sg-alb"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id                 = (known after apply)
+    }
+
+  # aws_security_group.app will be created
+  + resource "aws_security_group" "app" {
+      + arn                    = (known after apply)
+      + description            = "EC2 web/app - aceita apenas o ALB; sem SSH (acesso via SSM)"
+      + egress                 = (known after apply)
+      + id                     = (known after apply)
+      + ingress                = (known after apply)
+      + name                   = "farmavida-app"
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Name" = "sg-app"
+        }
+      + tags_all               = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "sg-app"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id                 = (known after apply)
+    }
+
+  # aws_security_group.db will be created
+  + resource "aws_security_group" "db" {
+      + arn                    = (known after apply)
+      + description            = "RDS PostgreSQL - aceita apenas as instancias de app"
+      + egress                 = (known after apply)
+      + id                     = (known after apply)
+      + ingress                = (known after apply)
+      + name                   = "farmavida-db"
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Name" = "sg-db"
+        }
+      + tags_all               = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "sg-db"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id                 = (known after apply)
+    }
+
+  # aws_sns_topic.alertas will be created
+  + resource "aws_sns_topic" "alertas" {
+      + arn                         = (known after apply)
+      + beginning_archive_time      = (known after apply)
+      + content_based_deduplication = false
+      + fifo_throughput_scope       = (known after apply)
+      + fifo_topic                  = false
+      + id                          = (known after apply)
+      + kms_master_key_id           = "alias/aws/sns"
+      + name                        = "farmavida-alertas"
+      + name_prefix                 = (known after apply)
+      + owner                       = (known after apply)
+      + policy                      = (known after apply)
+      + signature_version           = (known after apply)
+      + tags_all                    = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + tracing_config              = (known after apply)
+    }
+
+  # aws_sns_topic_subscription.email will be created
+  + resource "aws_sns_topic_subscription" "email" {
+      + arn                             = (known after apply)
+      + confirmation_timeout_in_minutes = 1
+      + confirmation_was_authenticated  = (known after apply)
+      + endpoint                        = "owner@farmavida.example"
+      + endpoint_auto_confirms          = false
+      + filter_policy_scope             = (known after apply)
+      + id                              = (known after apply)
+      + owner_id                        = (known after apply)
+      + pending_confirmation            = (known after apply)
+      + protocol                        = "email"
+      + raw_message_delivery            = false
+      + topic_arn                       = (known after apply)
+    }
+
+  # aws_subnet.app[0] will be created
+  + resource "aws_subnet" "app" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1a"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.0.11.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Camada" = "app"
+          + "Name"   = "farmavida-app-a"
+        }
+      + tags_all                                       = {
+          + "Ambiente"  = "projeto-final"
+          + "Camada"    = "app"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-app-a"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_subnet.app[1] will be created
+  + resource "aws_subnet" "app" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1b"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.0.12.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Camada" = "app"
+          + "Name"   = "farmavida-app-b"
+        }
+      + tags_all                                       = {
+          + "Ambiente"  = "projeto-final"
+          + "Camada"    = "app"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-app-b"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_subnet.dados[0] will be created
+  + resource "aws_subnet" "dados" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1a"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.0.21.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Camada" = "dados"
+          + "Name"   = "farmavida-dados-a"
+        }
+      + tags_all                                       = {
+          + "Ambiente"  = "projeto-final"
+          + "Camada"    = "dados"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-dados-a"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_subnet.dados[1] will be created
+  + resource "aws_subnet" "dados" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1b"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.0.22.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Camada" = "dados"
+          + "Name"   = "farmavida-dados-b"
+        }
+      + tags_all                                       = {
+          + "Ambiente"  = "projeto-final"
+          + "Camada"    = "dados"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-dados-b"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_subnet.publica[0] will be created
+  + resource "aws_subnet" "publica" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1a"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.0.1.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Camada" = "publica"
+          + "Name"   = "farmavida-publica-a"
+        }
+      + tags_all                                       = {
+          + "Ambiente"  = "projeto-final"
+          + "Camada"    = "publica"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-publica-a"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_subnet.publica[1] will be created
+  + resource "aws_subnet" "publica" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1b"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.0.2.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Camada" = "publica"
+          + "Name"   = "farmavida-publica-b"
+        }
+      + tags_all                                       = {
+          + "Ambiente"  = "projeto-final"
+          + "Camada"    = "publica"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-publica-b"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_vpc.principal will be created
+  + resource "aws_vpc" "principal" {
+      + arn                                  = (known after apply)
+      + cidr_block                           = "10.0.0.0/16"
+      + default_network_acl_id               = (known after apply)
+      + default_route_table_id               = (known after apply)
+      + default_security_group_id            = (known after apply)
+      + dhcp_options_id                      = (known after apply)
+      + enable_dns_hostnames                 = true
+      + enable_dns_support                   = true
+      + enable_network_address_usage_metrics = (known after apply)
+      + id                                   = (known after apply)
+      + instance_tenancy                     = "default"
+      + ipv6_association_id                  = (known after apply)
+      + ipv6_cidr_block                      = (known after apply)
+      + ipv6_cidr_block_network_border_group = (known after apply)
+      + main_route_table_id                  = (known after apply)
+      + owner_id                             = (known after apply)
+      + tags                                 = {
+          + "Name" = "farmavida-vpc"
+        }
+      + tags_all                             = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-vpc"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+    }
+
+  # aws_vpc_endpoint.s3 will be created
+  + resource "aws_vpc_endpoint" "s3" {
+      + arn                   = (known after apply)
+      + cidr_blocks           = (known after apply)
+      + dns_entry             = (known after apply)
+      + id                    = (known after apply)
+      + ip_address_type       = (known after apply)
+      + network_interface_ids = (known after apply)
+      + owner_id              = (known after apply)
+      + policy                = (known after apply)
+      + prefix_list_id        = (known after apply)
+      + private_dns_enabled   = (known after apply)
+      + requester_managed     = (known after apply)
+      + route_table_ids       = (known after apply)
+      + security_group_ids    = (known after apply)
+      + service_name          = "com.amazonaws.us-east-1.s3"
+      + service_region        = (known after apply)
+      + state                 = (known after apply)
+      + subnet_ids            = (known after apply)
+      + tags                  = {
+          + "Name" = "farmavida-vpce-s3"
+        }
+      + tags_all              = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "farmavida-vpce-s3"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + vpc_endpoint_type     = "Gateway"
+      + vpc_id                = (known after apply)
+
+      + dns_options (known after apply)
+
+      + subnet_configuration (known after apply)
+    }
+
+  # aws_vpc_security_group_egress_rule.alb_app will be created
+  + resource "aws_vpc_security_group_egress_rule" "alb_app" {
+      + arn                          = (known after apply)
+      + description                  = "Encaminha para as instancias"
+      + from_port                    = 80
+      + id                           = (known after apply)
+      + ip_protocol                  = "tcp"
+      + referenced_security_group_id = (known after apply)
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags_all                     = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + to_port                      = 80
+    }
+
+  # aws_vpc_security_group_egress_rule.app_db will be created
+  + resource "aws_vpc_security_group_egress_rule" "app_db" {
+      + arn                          = (known after apply)
+      + description                  = "PostgreSQL no RDS"
+      + from_port                    = 5432
+      + id                           = (known after apply)
+      + ip_protocol                  = "tcp"
+      + referenced_security_group_id = (known after apply)
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags_all                     = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + to_port                      = 5432
+    }
+
+  # aws_vpc_security_group_egress_rule.app_http_pacotes will be created
+  + resource "aws_vpc_security_group_egress_rule" "app_http_pacotes" {
+      + arn                    = (known after apply)
+      + cidr_ipv4              = "0.0.0.0/0"
+      + description            = "HTTP de saida para repositorios de pacotes do Amazon Linux"
+      + from_port              = 80
+      + id                     = (known after apply)
+      + ip_protocol            = "tcp"
+      + security_group_id      = (known after apply)
+      + security_group_rule_id = (known after apply)
+      + tags_all               = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + to_port                = 80
+    }
+
+  # aws_vpc_security_group_egress_rule.app_https will be created
+  + resource "aws_vpc_security_group_egress_rule" "app_https" {
+      + arn                    = (known after apply)
+      + cidr_ipv4              = "0.0.0.0/0"
+      + description            = "HTTPS de saida (pacotes, SSM, CloudWatch, Secrets Manager) via NAT/endpoint"
+      + from_port              = 443
+      + id                     = (known after apply)
+      + ip_protocol            = "tcp"
+      + security_group_id      = (known after apply)
+      + security_group_rule_id = (known after apply)
+      + tags_all               = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + to_port                = 443
+    }
+
+  # aws_vpc_security_group_ingress_rule.alb_cloudfront will be created
+  + resource "aws_vpc_security_group_ingress_rule" "alb_cloudfront" {
+      + arn                    = (known after apply)
+      + description            = "HTTP somente dos edge locations do CloudFront"
+      + from_port              = 80
+      + id                     = (known after apply)
+      + ip_protocol            = "tcp"
+      + prefix_list_id         = "pl-3b927c52"
+      + security_group_id      = (known after apply)
+      + security_group_rule_id = (known after apply)
+      + tags_all               = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + to_port                = 80
+    }
+
+  # aws_vpc_security_group_ingress_rule.app_alb will be created
+  + resource "aws_vpc_security_group_ingress_rule" "app_alb" {
+      + arn                          = (known after apply)
+      + description                  = "HTTP vindo do ALB"
+      + from_port                    = 80
+      + id                           = (known after apply)
+      + ip_protocol                  = "tcp"
+      + referenced_security_group_id = (known after apply)
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags_all                     = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + to_port                      = 80
+    }
+
+  # aws_vpc_security_group_ingress_rule.db_app will be created
+  + resource "aws_vpc_security_group_ingress_rule" "db_app" {
+      + arn                          = (known after apply)
+      + description                  = "PostgreSQL vindo do app"
+      + from_port                    = 5432
+      + id                           = (known after apply)
+      + ip_protocol                  = "tcp"
+      + referenced_security_group_id = (known after apply)
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags_all                     = {
+          + "Ambiente"  = "projeto-final"
+          + "Grupo"     = "addr"
+          + "ManagedBy" = "terraform"
+          + "Owner"     = "owner@farmavida.example"
+          + "Projeto"   = "ecommerce-farmavida"
+        }
+      + to_port                      = 5432
+    }
+
+  # random_id.sufixo will be created
+  + resource "random_id" "sufixo" {
+      + b64_std     = (known after apply)
+      + b64_url     = (known after apply)
+      + byte_length = 3
+      + dec         = (known after apply)
+      + hex         = (known after apply)
+      + id          = (known after apply)
+    }
+
+Plan: 76 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + alb_dns_name   = (known after apply)
+  + azs_utilizadas = [
+      + "us-east-1a",
+      + "us-east-1b",
+    ]
+  + bucket_imagens = (known after apply)
+  + rds_endpoint   = (known after apply)
+  + rds_secret_arn = (known after apply)
+  + url_loja       = (known after apply)
+  + vpc_id         = (known after apply)
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.

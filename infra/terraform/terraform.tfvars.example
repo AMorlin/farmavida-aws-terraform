@@ -1,0 +1,9 @@
+# cp terraform.tfvars.example terraform.tfvars  (o .tfvars fica fora do Git)
+
+grupo = "addr"                  # tag Grupo em todos os recursos
+owner = "voce@exemplo.com"      # tag Owner + destino dos alarmes (SNS) e do AWS Budget
+
+# aws_profile       = "meu-perfil"   # profile do ~/.aws/credentials (padrão: cadeia de credenciais)
+# region            = "us-east-1"
+# asg_max           = 20
+# budget_mensal_usd = 300
