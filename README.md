@@ -73,7 +73,7 @@ O maior item é o NAT Gateway (~31%), preço de manter uma saída para a interne
 - **TLS:** cliente → CloudFront e aplicação → banco cifrados; o trecho CloudFront → ALB fica em HTTP até haver domínio próprio com certificado ACM.
 - **Próximos passos:** domínio + ACM + WAF no CloudFront, teste de carga demonstrando o Auto Scaling, RDS Proxy/read replica para o checkout em pico e cópia de snapshots para outra região.
 
-O documento de arquitetura completo, com matriz de decisão de provedor, ADR, topologia de rede, IAM, RPO/RTO, FinOps e Well-Architected, está em [`docs/DOCUMENTO_ARQUITETURA.pdf`](docs/DOCUMENTO_ARQUITETURA.pdf).
+O documento de arquitetura completo, com matriz de decisão de provedor, ADR, topologia de rede, IAM, RPO/RTO, FinOps e Well-Architected, está em [`docs/FarmaVida_Equipe-ADDR_Documento-de-Arquitetura.pdf`](docs/FarmaVida_Equipe-ADDR_Documento-de-Arquitetura.pdf).
 
 ## Equipe ADDR
 
